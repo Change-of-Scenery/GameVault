@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using GameVault.Models;
 
 namespace GameVault.Controllers;
 
@@ -7,6 +8,18 @@ namespace GameVault.Controllers;
 public class GamesController : ControllerBase
 {
     /// <summary>
+    /// Static in-memory list of games for testing purposes
+    /// </summary>
+    private static readonly List<Game> _games = new()
+    {
+        new Game { Id = 1, Title = "The Legend of Zelda", Genre = "Adventure", ReleaseYear = 1986 },
+        new Game { Id = 2, Title = "Super Mario Bros", Genre = "Platformer", ReleaseYear = 1985 },
+        new Game { Id = 3, Title = "Minecraft", Genre = "Sandbox", ReleaseYear = 2011 },
+        new Game { Id = 4, Title = "The Witcher 3", Genre = "RPG", ReleaseYear = 2015 },
+        new Game { Id = 5, Title = "Portal 2", Genre = "Puzzle", ReleaseYear = 2011 }
+    };
+
+    /// <summary>
     /// Get all games
     /// </summary>
     /// <returns>A list of all games</returns>
@@ -14,14 +27,7 @@ public class GamesController : ControllerBase
     [ProducesResponseType(StatusCodes.Status200OK)]
     public ActionResult<IEnumerable<Game>> GetGames()
     {
-        var games = new List<Game>
-        {
-            new Game { Id = 1, Title = "The Legend of Zelda", Genre = "Adventure", ReleaseYear = 1986 },
-            new Game { Id = 2, Title = "Super Mario Bros", Genre = "Platformer", ReleaseYear = 1985 },
-            new Game { Id = 3, Title = "Minecraft", Genre = "Sandbox", ReleaseYear = 2011 }
-        };
-        
-        return Ok(games);
+        return Ok(_games);
     }
 
     /// <summary>
@@ -34,7 +40,13 @@ public class GamesController : ControllerBase
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public ActionResult<Game> GetGame(int id)
     {
-        var game = new Game { Id = id, Title = "Sample Game", Genre = "Action", ReleaseYear = 2024 };
+        var game = _games.FirstOrDefault(g => g.Id == id);
+        
+        if (game == null)
+        {
+            return NotFound(new { message = $"Game with ID {id} not found." });
+        }
+        
         return Ok(game);
     }
 
@@ -48,6 +60,16 @@ public class GamesController : ControllerBase
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public ActionResult<Game> CreateGame([FromBody] Game game)
     {
+        if (string.IsNullOrWhiteSpace(game.Title) || string.IsNullOrWhiteSpace(game.Genre))
+        {
+            return BadRequest(new { message = "Title and Genre are required fields." });
+        }
+
+        // Generate new ID
+        game.Id = _games.Any() ? _games.Max(g => g.Id) + 1 : 1;
+        
+        _games.Add(game);
+        
         return CreatedAtAction(nameof(GetGame), new { id = game.Id }, game);
     }
 
@@ -59,9 +81,27 @@ public class GamesController : ControllerBase
     /// <returns>No content</returns>
     [HttpPut("{id}")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public IActionResult UpdateGame(int id, [FromBody] Game game)
     {
+        if (string.IsNullOrWhiteSpace(game.Title) || string.IsNullOrWhiteSpace(game.Genre))
+        {
+            return BadRequest(new { message = "Title and Genre are required fields." });
+        }
+
+        var existingGame = _games.FirstOrDefault(g => g.Id == id);
+        
+        if (existingGame == null)
+        {
+            return NotFound(new { message = $"Game with ID {id} not found." });
+        }
+        
+        // Update properties
+        existingGame.Title = game.Title;
+        existingGame.Genre = game.Genre;
+        existingGame.ReleaseYear = game.ReleaseYear;
+        
         return NoContent();
     }
 
@@ -75,32 +115,15 @@ public class GamesController : ControllerBase
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public IActionResult DeleteGame(int id)
     {
+        var game = _games.FirstOrDefault(g => g.Id == id);
+        
+        if (game == null)
+        {
+            return NotFound(new { message = $"Game with ID {id} not found." });
+        }
+        
+        _games.Remove(game);
+        
         return NoContent();
     }
-}
-
-/// <summary>
-/// Represents a game in the vault
-/// </summary>
-public class Game
-{
-    /// <summary>
-    /// The unique identifier for the game
-    /// </summary>
-    public int Id { get; set; }
-    
-    /// <summary>
-    /// The title of the game
-    /// </summary>
-    public required string Title { get; set; }
-    
-    /// <summary>
-    /// The genre of the game
-    /// </summary>
-    public required string Genre { get; set; }
-    
-    /// <summary>
-    /// The year the game was released
-    /// </summary>
-    public int ReleaseYear { get; set; }
 }
