@@ -1,4 +1,7 @@
 using GameVault.Components;
+using GameVault.Data;
+using GameVault.Services;
+using Microsoft.EntityFrameworkCore;
 using Scalar.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -9,6 +12,13 @@ builder.Services.AddRazorComponents()
 
 // Add controller services
 builder.Services.AddControllers();
+
+// Add Database Context
+builder.Services.AddDbContext<GameVaultDbContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+// Register repositories
+builder.Services.AddScoped<IGameRepository, GameRepository>();
 
 // Add OpenAPI services
 builder.Services.AddOpenApi();
