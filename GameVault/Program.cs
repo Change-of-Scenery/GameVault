@@ -2,6 +2,7 @@ using GameVault.Components;
 using GameVault.Data;
 using Microsoft.EntityFrameworkCore;
 using Scalar.AspNetCore;
+using GameVault.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -19,9 +20,12 @@ builder.Services.AddOpenApi();
 builder.Services.AddDbContext<GameVaultDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
+// Register application services
+builder.Services.AddScoped<IGameRepository, GameRepository>();
+
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
+// Configure the HTTP request pipeline. 
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Error", createScopeForErrors: true);
