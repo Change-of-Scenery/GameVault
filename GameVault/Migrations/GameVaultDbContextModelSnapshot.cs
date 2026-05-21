@@ -8,12 +8,12 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 #nullable disable
 
 namespace GameVault.Migrations
-{
+    {
     [DbContext(typeof(GameVaultDbContext))]
     partial class GameVaultDbContextModelSnapshot : ModelSnapshot
-    {
-        protected override void BuildModel(ModelBuilder modelBuilder)
         {
+        protected override void BuildModel(ModelBuilder modelBuilder)
+            {
 #pragma warning disable 612, 618
             modelBuilder
                 .HasAnnotation("ProductVersion", "9.0.10")
@@ -46,42 +46,42 @@ namespace GameVault.Migrations
 
                     b.HasData(
                         new
-                        {
+                            {
                             Id = 1,
                             Genre = "Adventure",
                             ReleaseYear = 1986,
                             Title = "The Legend of Zelda"
-                        },
+                            },
                         new
-                        {
+                            {
                             Id = 2,
                             Genre = "Platformer",
                             ReleaseYear = 1985,
                             Title = "Super Mario Bros"
-                        },
+                            },
                         new
-                        {
+                            {
                             Id = 3,
                             Genre = "Sandbox",
                             ReleaseYear = 2011,
                             Title = "Minecraft"
-                        },
+                            },
                         new
-                        {
+                            {
                             Id = 4,
                             Genre = "RPG",
                             ReleaseYear = 2015,
                             Title = "The Witcher 3"
-                        },
+                            },
                         new
-                        {
+                            {
                             Id = 5,
                             Genre = "Puzzle",
                             ReleaseYear = 2011,
                             Title = "Portal 2"
-                        });
+                            });
                 });
 #pragma warning restore 612, 618
+            }
         }
     }
-}

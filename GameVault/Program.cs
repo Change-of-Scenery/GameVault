@@ -1,6 +1,5 @@
 using GameVault.Components;
 using GameVault.Data;
-using GameVault.Services;
 using Microsoft.EntityFrameworkCore;
 using Scalar.AspNetCore;
 
@@ -10,18 +9,15 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
-// Add controller services
+// Register API controllers
 builder.Services.AddControllers();
 
-// Add Database Context
+// Register OpenAPI for API documentation
+builder.Services.AddOpenApi();
+
+// Register EF Core DbContext with SQL Server provider
 builder.Services.AddDbContext<GameVaultDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
-
-// Register repositories
-builder.Services.AddScoped<IGameRepository, GameRepository>();
-
-// Add OpenAPI services
-builder.Services.AddOpenApi();
 
 var app = builder.Build();
 
@@ -32,24 +28,22 @@ if (!app.Environment.IsDevelopment())
     // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
-
-// Map OpenAPI endpoint
-app.MapOpenApi();
-
-// Add Scalar UI for API documentation
-app.MapScalarApiReference();
-
 app.UseStatusCodePagesWithReExecute("/not-found", createScopeForStatusCodePages: true);
 app.UseHttpsRedirection();
 
 app.UseAntiforgery();
 
 app.MapStaticAssets();
-
-// Map controllers
-app.MapControllers();
-
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();
+
+// Map API controllers
+app.MapControllers();
+
+// Map OpenAPI specification endpoint
+app.MapOpenApi();
+
+// Map Scalar API documentation UI
+app.MapScalarApiReference();
 
 app.Run();
